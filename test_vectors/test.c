@@ -1440,6 +1440,7 @@ int test_e2e_cli(void) {
     }
 }
 
+/***** 깃허브 주소 https://github.com/SWTEAM4/final_swproject *****/
 int main(void) {
     printf("=======================================\n");
     printf("  Cryptographic Functions Test Suite\n");
