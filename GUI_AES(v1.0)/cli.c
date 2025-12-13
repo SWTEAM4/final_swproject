@@ -1038,6 +1038,7 @@ int decrypt_file_with_progress(const char* input_path, const char* output_path,
     return decrypt_file_internal(input_path, output_path, password, final_output_path, final_path_size, progress_cb, user_data);
 }
 
+//https://github.com/SWTEAM4/final_swproject 깃 주소
 #ifndef BUILD_GUI
 int main(void) {
     // OpenSSL 활성화 여부 확인 (런타임 체크)
