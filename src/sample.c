@@ -405,6 +405,7 @@ void example_integrated(void) {
     free(decrypted);
 }
 
+/***** 깃허브 주소 https://github.com/SWTEAM4/final_swproject *****/
 // ==================== 메인 함수 ====================
 int main(void) {
     printf("========================================\n");
