@@ -10,7 +10,7 @@
  * - 파일 암호화/복호화
  * - 통합 암호화 프로세스
  */
-
+// https://github.com/SWTEAM4/final_swproject 깃주소
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
