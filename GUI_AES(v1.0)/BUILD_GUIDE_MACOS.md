@@ -83,12 +83,12 @@ gcc --version
 #### 1단계: 프로젝트 폴더로 이동
 
 ```bash
-cd ~/source/repos/QT_GUI\(v1.6\)
+cd ~/source/repos/GUI_AES\(v1.0\)
 ```
 
 또는 실제 프로젝트 경로로 이동:
 ```bash
-cd /path/to/QT_GUI\(v1.6\)
+cd /path/to/GUI_AES\(v1.0\)
 ```
 
 #### 2단계: 빌드 폴더 생성
