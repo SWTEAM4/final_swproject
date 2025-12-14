@@ -132,11 +132,21 @@ static void init_inv_tables(void) {
     if (inv_tables_initialized) return;
     
     for (int i = 0; i < 256; i++) {
+        // Inverse T-tables는 inv_s_box를 기반으로 생성해야 합니다!
+        // T-tables는 s_box 기반, Inverse T-tables는 inv_s_box 기반이어야 합니다.
         uint8_t s = inv_s_box[i];
-        uint8_t s9 = xtimes(xtimes(xtimes(s))) ^ s;      // 9·S[a]
-        uint8_t s11 = xtimes(xtimes(xtimes(s))) ^ xtimes(s) ^ s;  // 11·S[a]
-        uint8_t s13 = xtimes(xtimes(xtimes(s))) ^ xtimes(xtimes(s)) ^ s;  // 13·S[a]
-        uint8_t s14 = xtimes(xtimes(xtimes(s))) ^ xtimes(xtimes(s)) ^ xtimes(s);  // 14·S[a]
+        
+        // GF(2^8)에서 곱셈 계산 (중간 값 재사용으로 최적화)
+        // 2^n 계산: 2, 4, 8
+        uint8_t s2 = xtimes(s);           // 2·s
+        uint8_t s4 = xtimes(s2);           // 4·s
+        uint8_t s8 = xtimes(s4);           // 8·s
+        
+        // Inverse MixColumns 계수 계산
+        uint8_t s9 = s8 ^ s;                // 9·s = 8·s + 1·s
+        uint8_t s11 = s8 ^ s2 ^ s;         // 11·s = 8·s + 2·s + 1·s
+        uint8_t s13 = s8 ^ s4 ^ s;         // 13·s = 8·s + 4·s + 1·s
+        uint8_t s14 = s8 ^ s4 ^ s2;        // 14·s = 8·s + 4·s + 2·s
         
         // Inverse MixColumns 행렬: [14, 11, 13, 9]
         // IT0[a] = [14·S[a], 9·S[a], 13·S[a], 11·S[a]]
@@ -244,15 +254,51 @@ static void InvSubBytesAndMixColumns(uint8_t state[4][4]) {
     init_inv_tables(); // Inverse T-tables 초기화 (최초 1회만 수행)
     
     for (int j = 0; j < 4; j++) {
+        // IT 테이블은 inv_s_box 기반으로 생성되었으므로, state 값을 직접 인덱스로 사용
         uint32_t result = IT0[state[0][j]] ^ IT1[state[1][j]] ^ IT2[state[2][j]] ^ IT3[state[3][j]];
         // 32비트 결과를 4바이트로 분리
         state[0][j] = (uint8_t)(result & 0xFF);
         state[1][j] = (uint8_t)((result >> 8) & 0xFF);
         state[2][j] = (uint8_t)((result >> 16) & 0xFF);
-        state[3][j] = (uint8_t)((result >> 24) & 0xFF);
+        state[3][j] = (uint8_t)(result >> 24);
     }
 }
 
+/**
+ * @brief InvMixColumns: 각 열에 대해 Inverse MixColumns 연산을 수행합니다 (라운드 키 변환용).
+ * @param state 4x4 크기의 데이터 블록
+ */
+static void InvMixColumns(uint8_t state[4][4]) {
+    for (int j = 0; j < 4; j++) {
+        uint8_t s0 = state[0][j];
+        uint8_t s1 = state[1][j];
+        uint8_t s2 = state[2][j];
+        uint8_t s3 = state[3][j];
+        
+        // GF(2^8) 곱셈 계산
+        uint8_t s0_2 = xtimes(s0), s0_4 = xtimes(s0_2), s0_8 = xtimes(s0_4);
+        uint8_t s0_9 = s0_8 ^ s0, s0_11 = s0_8 ^ s0_2 ^ s0;
+        uint8_t s0_13 = s0_8 ^ s0_4 ^ s0, s0_14 = s0_8 ^ s0_4 ^ s0_2;
+        
+        uint8_t s1_2 = xtimes(s1), s1_4 = xtimes(s1_2), s1_8 = xtimes(s1_4);
+        uint8_t s1_9 = s1_8 ^ s1, s1_11 = s1_8 ^ s1_2 ^ s1;
+        uint8_t s1_13 = s1_8 ^ s1_4 ^ s1, s1_14 = s1_8 ^ s1_4 ^ s1_2;
+        
+        uint8_t s2_2 = xtimes(s2), s2_4 = xtimes(s2_2), s2_8 = xtimes(s2_4);
+        uint8_t s2_9 = s2_8 ^ s2, s2_11 = s2_8 ^ s2_2 ^ s2;
+        uint8_t s2_13 = s2_8 ^ s2_4 ^ s2, s2_14 = s2_8 ^ s2_4 ^ s2_2;
+        
+        uint8_t s3_2 = xtimes(s3), s3_4 = xtimes(s3_2), s3_8 = xtimes(s3_4);
+        uint8_t s3_9 = s3_8 ^ s3, s3_11 = s3_8 ^ s3_2 ^ s3;
+        uint8_t s3_13 = s3_8 ^ s3_4 ^ s3, s3_14 = s3_8 ^ s3_4 ^ s3_2;
+        
+        // Inverse MixColumns 행렬 적용: [14, 11, 13, 9]
+        state[0][j] = s0_14 ^ s1_11 ^ s2_13 ^ s3_9;
+        state[1][j] = s0_9  ^ s1_14 ^ s2_11 ^ s3_13;
+        state[2][j] = s0_13 ^ s1_9  ^ s2_14 ^ s3_11;
+        state[3][j] = s0_11 ^ s1_13 ^ s2_9  ^ s3_14;
+    }
+}
 
 /**
  * @brief AddRoundKey: state와 현재 라운드 키를 XOR 연산합니다.
@@ -379,6 +425,34 @@ CRYPTO_STATUS AES_set_key(AES_CTX* ctx, const uint8_t* key, int key_bits) {
         default:
             return CRYPTO_ERR_INVALID_ARGUMENT; // 지원하지 않는 키 길이
     }
+    
+    // 복호화용 라운드 키 생성 (InvMixColumns 적용)
+    // 암호화용 라운드 키는 그대로 유지
+    memcpy(ctx->inv_round_keys, ctx->round_keys, (ctx->Nr + 1) * 16);
+    
+    // 각 라운드 키(1부터 Nr-1까지)에 InvMixColumns 적용
+    for (int r = 1; r < ctx->Nr; r++) {
+        uint8_t* round_key = ctx->inv_round_keys + r * 16;
+        uint8_t key_state[4][4];
+        
+        // 라운드 키를 4x4 행렬로 변환
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                key_state[j][i] = round_key[i * 4 + j];
+            }
+        }
+        
+        // InvMixColumns 적용
+        InvMixColumns(key_state);
+        
+        // 다시 원래 형식으로 변환
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                round_key[i * 4 + j] = key_state[j][i];
+            }
+        }
+    }
+    
     return CRYPTO_SUCCESS;
 }
 
@@ -442,20 +516,20 @@ CRYPTO_STATUS AES_decrypt_block(const AES_CTX* ctx, const uint8_t in[AES_BLOCK_S
     for(int i=0; i<4; i++) for(int j=0; j<4; j++) state[j][i] = in[i*4+j];
 
     // 2. 초기 라운드: AddRoundKey (마지막 라운드 키 사용)
-    AddRoundKey(state, ctx->round_keys + ctx->Nr * 16);
+    AddRoundKey(state, ctx->inv_round_keys + ctx->Nr * 16);
 
     // 3. 메인 라운드: (Nr - 1)번 반복 (역순)
     // T-tables 최적화: InvShiftRows 후 InvSubBytesAndMixColumns를 한 번에 수행
     for (int r = ctx->Nr - 1; r >= 1; r--) {
         InvShiftRows(state);
         InvSubBytesAndMixColumns(state); // Inverse T-tables 사용: InvSubBytes + InvMixColumns 동시 수행
-        AddRoundKey(state, ctx->round_keys + r * 16); // r번째 라운드 키 사용
+        AddRoundKey(state, ctx->inv_round_keys + r * 16); // InvMixColumns 적용된 라운드 키 사용
     }
 
     // 4. 마지막 라운드: InvMixColumns 제외
     InvShiftRows(state);
     InvSubBytes(state);
-    AddRoundKey(state, ctx->round_keys); // 초기 라운드 키 사용
+    AddRoundKey(state, ctx->inv_round_keys); // 초기 라운드 키 사용 (InvMixColumns 미적용)
 
     // 5. state 행렬을 출력 버퍼로 변환
     for(int i=0; i<4; i++) for(int j=0; j<4; j++) out[i*4+j] = state[j][i];

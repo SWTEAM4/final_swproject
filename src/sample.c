@@ -111,12 +111,17 @@ void example_aes_ctr_mode(void) {
     uint8_t* plaintext = (uint8_t*)message;
     
     uint8_t* ciphertext = (uint8_t*)malloc(message_len);
-    uint8_t* decrypted = (uint8_t*)malloc(message_len);
+    uint8_t* decrypted = (uint8_t*)malloc(message_len + 1); // null terminator 공간 추가
     
     if (!ciphertext || !decrypted) {
         printf("Memory allocation failed\n");
+        if (ciphertext) free(ciphertext);
+        if (decrypted) free(decrypted);
         return;
     }
+    
+    // null terminator를 위해 초기화
+    memset(decrypted, 0, message_len + 1);
     
     // 키 설정
     CRYPTO_STATUS status = AES_set_key(&ctx, key, 128);
@@ -386,7 +391,17 @@ void example_integrated(void) {
     
     // 4. 복호화 및 검증
     printf("\n4. Decryption and verification\n");
-    uint8_t* decrypted = (uint8_t*)malloc(message_len);
+    uint8_t* decrypted = (uint8_t*)malloc(message_len + 1); // null terminator 공간 추가
+    
+    if (!decrypted) {
+        printf("   [ERROR] Memory allocation failed\n");
+        free(ciphertext);
+        return;
+    }
+    
+    // null terminator를 위해 초기화
+    memset(decrypted, 0, message_len + 1);
+    
     memcpy(nonce_copy, nonce, AES_BLOCK_SIZE);
     AES_CTR_crypt(&aes_ctx, ciphertext, message_len, decrypted, nonce_copy);
     

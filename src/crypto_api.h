@@ -36,7 +36,8 @@ extern "C" {
     /* --------------------------- AES context --------------------------- */
     // AES 연산에 필요한 state를 담아 두는 구조체
     typedef struct {
-        uint8_t round_keys[240];  // 라운드키 저장 공간 (AES256의 최대 240바이트에 맞춰 배열 선언)
+        uint8_t round_keys[240];  // 암호화용 라운드키 저장 공간 (AES256의 최대 240바이트에 맞춰 배열 선언)
+        uint8_t inv_round_keys[240];  // 복호화용 라운드키 저장 공간 (InvMixColumns 적용된 키)
         uint8_t Nr;               // 라운드 수 
         uint8_t Nk;               // 키 워드 수 (4/6/8) (워드 = 4바이트)
         uint16_t key_bits;        // 키 길이 (128/192/256)
