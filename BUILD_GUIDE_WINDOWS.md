@@ -1,6 +1,9 @@
-# CLI_AES(v1.0) Build Guide
+# CLI_AES(v1.0), src, test_vectors Build Guide
 
-본 문서는 CLI_AES(v1.0) 프로젝트의 **Windows** 환경에서의 빌드 방법을 설명한다.
+본 문서는 CLI_AES(v1.0), src, test_vectors 프로젝트의 **Windows** 환경에서의 빌드 방법을 설명한다.
+프로젝트 빌드 전, 반드시 해당 방법을 준수하여야 한다.
+
+자세한 내용은 "라이브러리 소스코드 사용설명서"를 참고
 
 ---
 
@@ -42,11 +45,9 @@ vcpkg 디렉터리로 이동 후 부트스트랩 실행:
 cd vcpkg
 bootstrap-vcpkg.bat
 ```
-
-📌 실행 완료 후 `vcpkg.exe`가 생성되면 성공이다.
+📌 실행 완료 후 vcpkg.exe가 생성되면 성공이다.
 
 ---
-
 ### 1-d. OpenSSL 설치
 
 64비트(권장):
@@ -99,6 +100,8 @@ USE_OPENSSL;PLATFORM_WINDOWS
 
 Visual Studio에서 **빌드(Build)** 실행
 
+src/sample.c, test_vectors/test.c 에 main 함수 존재
+
 ---
 
 ### 3. 컴파일 오류 발생 시 (인코딩 문제)
@@ -109,8 +112,10 @@ Visual Studio에서 **빌드(Build)** 실행
 
 ##### (선택) 자동 변환 도구 사용
 
+(도구 다운로드는 선택사항이나, 다운로드를 하지 않을 경우 모든 소스코드 파일을 직접 UTF-8로 인코딩 해주어야 함)
+
 * Visual Studio 확장 도구 다운로드:
-  [https://marketplace.visualstudio.com/items?itemName=Bluehill.EncondingConverter](https://marketplace.visualstudio.com/items?itemName=Bluehill.EncondingConverter)
+  [https://marketplace.visualstudio.com/items?itemName=Bluehill.EncondingConverter]
 
 ##### 사용 방법
 
