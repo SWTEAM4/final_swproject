@@ -25,3 +25,6 @@
 - **test_vectors**
   - 암호화 알고리즘 테스트 벡터 검증 (AES-CTR, SHA-512, HMAC-SHA512, PBKDF2-SHA512)
   - CLI 애플리케이션 성능 테스트
+
+- **solution**
+  - GUI를 제외한 각 암호 모듈 및 애플리케이션 소스코드에 대한 참고용 솔루션 구현을 포함
