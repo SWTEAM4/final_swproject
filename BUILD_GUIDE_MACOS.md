@@ -105,7 +105,7 @@ gcc -o cli \
 ```bash
 ./cli
 ```
-src, test_vectors의 경우 동일한 방법으로 실행행
+src, test_vectors의 경우 동일한 방법으로 컴파일 후 실행
 
 ---
 
