@@ -1,6 +1,8 @@
-# CLI_AES(v1.0) Build Guide
+# CLI_AES(v1.0), src, test_vectors Build Guide
 
-본 문서는 CLI_AES(v1.0) 프로젝트의 **macOS** 환경에서의 빌드 방법을 설명한다.
+본 문서는 CLI_AES(v1.0), src, test_vectors 프로젝트의 **macOS** 환경에서의 빌드 방법을 설명한다.
+프로젝트 빌드 전, 반드시 해당 방법을 준수하여야 한다.
+자세한 내용은 "라이브러리 소스코드 사용설명서"를 참고
 
 ---
 
@@ -103,6 +105,7 @@ gcc -o cli \
 ```bash
 ./cli
 ```
+src, test_vectors의 경우 동일한 방법으로 실행행
 
 ---
 
