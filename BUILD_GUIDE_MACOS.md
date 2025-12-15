@@ -112,5 +112,4 @@ src, test_vectors의 경우 동일한 방법으로 컴파일 후 실행
 ### 참고 사항
 
 * 본 프로젝트는 **OpenSSL libcrypto**에 의존한다.
-* `USE_OPENSSL`, `PLATFORM_WINDOWS`, `PLATFORM_MAC` 전처리기 정의는 필수이다.
 * C 표준은 **C99**를 기준으로 컴파일된다.
